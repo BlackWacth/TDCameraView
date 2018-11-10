@@ -6,55 +6,55 @@ import java.util.Set;
 
 public abstract class AbsCameraView {
 
-    final Callback mCallback;
+    public final Callback mCallback;
 
-    final AbsPreview mAbsPreview;
+    public final AbsPreview mPreview;
 
     public AbsCameraView(Callback callback, AbsPreview AbsPreview) {
         mCallback = callback;
-        mAbsPreview = AbsPreview;
+        mPreview = AbsPreview;
     }
 
-    View getView() {
-        return mAbsPreview.getView();
+    public View getView() {
+        return mPreview.getView();
     }
 
     /**
-     *
      * @return 能正常打开Camera返回true
      */
-    abstract boolean start();
+    public abstract boolean start();
 
-    abstract boolean stop();
+    public abstract boolean stop();
 
-    abstract boolean isCameraOpened();
+    public abstract boolean isCameraOpened();
 
-    abstract void setFacing(int facing);
+    public abstract void setFacing(int facing);
 
-    abstract int getFacing();
+    public abstract int getFacing();
 
-    abstract Set<AspectRatio> getSupportedAspectRatio();
+    public abstract Set<AspectRatio> getSupportedAspectRatio();
 
     /**
      * 设置纵横比
+     *
      * @param ratio 纵横比
      * @return 纵横比改变了为true
      */
-    abstract boolean setAspectRatio(AspectRatio ratio);
+    public abstract boolean setAspectRatio(AspectRatio ratio);
 
-    abstract boolean getAutoFocus();
+    public abstract boolean getAutoFocus();
 
-    abstract void setAutoFocus(boolean autoFocus);
+    public abstract void setAutoFocus(boolean autoFocus);
 
-    abstract void setFlash(int flash);
+    public abstract void setFlash(int flash);
 
-    abstract int getFlash();
+    public abstract int getFlash();
 
-    abstract void takePicture();
+    public abstract void takePicture();
 
-    abstract void stDisplayOrientation(int displayOrientation);
+    public abstract void stDisplayOrientation(int displayOrientation);
 
-    interface Callback{
+    public interface Callback {
         void onCameraOpened();
 
         void onCameraClosed();

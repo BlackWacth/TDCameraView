@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 /**
  * 以像素为单位，描述宽高，宽高设置后不可变
+ * 以mWidth*mHeight乘积进行对比
  */
 public class Size implements Comparable<Size> {
 

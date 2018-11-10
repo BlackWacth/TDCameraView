@@ -1,6 +1,10 @@
 package com.bruce.lib;
 
+import android.util.ArrayMap;
+
 import org.junit.Test;
+
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
@@ -12,6 +16,17 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+        System.out.println("##  ArrayMap  ##");
+        ArrayMap<String, String> ht = new ArrayMap<>();
+        ht.put("1", "OOO");
+        ht.put("3", "OOO");
+        ht.put("2", "OOO");
+        ht.put("5", "OOO");
+        ht.put("4", "OOO");
+
+        Iterator<String> it = ht.keySet().iterator();
+        while (it.hasNext()) {
+            System.out.println(it.next());
+        }
     }
 }
