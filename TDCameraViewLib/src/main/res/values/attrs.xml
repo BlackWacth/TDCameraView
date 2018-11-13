@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <declare-styleable name="CameraView">
+        <!-- 如果您希望CameraView调整其边界以保持其相机预览的纵横比，请将此项设置为true-->
+        <attr name="android:adjustViewBounds"/>
+        <!-- 相机相对于屏幕的方向 -->
+        <attr name="facing" format="enum">
+            <!-- 相机与屏幕相反的方向 -->
+            <enum name="back" value="0"/>
+            <!-- 相机与屏幕相同的方向 -->
+            <enum name="front" value="1"/>
+        </attr>
+        <!-- 相机预览和图片的宽高比 -->
+        <attr name="aspectRatio" format="string"/>
+        <!-- 连续自动对焦模式 -->
+        <attr name="autoFocus" format="boolean"/>
+        <!-- 闪光灯模式 -->
+        <attr name="flash" format="enum">
+            <!-- 关闭闪光灯 -->
+            <enum name="off" value="0"/>
+            <!--
+              拍照期间始终会触发闪光灯
+              根据驱动程序的不同，在预览或自动对焦期间也可能会闪光。
+            -->
+            <enum name="on" value="1"/>
+            <!--
+              预览，自动对焦和快照期间持续发光。
+              这也可以用于视频录制。
+            -->
+            <enum name="torch" value="2"/>
+            <!--
+              Flash将在需要时自动触发。
+              闪光灯可能会在预览，自动对焦或快照期间闪光，具体取决于驱动程序。
+            -->
+            <enum name="auto" value="3"/>
+            <!-- 闪光灯将在防红眼模式下闪光 -->
+            <enum name="redEye" value="4"/>
+        </attr>
+    </declare-styleable>
+</resources>

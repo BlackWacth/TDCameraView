@@ -2,9 +2,7 @@ package com.bruce.lib.api14;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.os.Build;
 import android.support.v4.util.SparseArrayCompat;
-import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.bruce.lib.base.AbsCameraView;
@@ -16,6 +14,7 @@ import com.bruce.lib.base.SizeMap;
 import com.bruce.lib.utils.L;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -52,13 +51,10 @@ public class Camera1 extends AbsCameraView {
 
     public Camera1(AbsCameraView.Callback callback, AbsPreview preview) {
         super(callback, preview);
-        preview.setCallback(new AbsPreview.Callback() {
-            @Override
-            public void onSurfaceChanged() {
-                if (mCamera != null) {
-                    setupPreview();
-                    adjustCameraParameters();
-                }
+        preview.setCallback(() -> {
+            if (mCamera != null) {
+                setupPreview();
+                adjustCameraParameters();
             }
         });
     }
@@ -66,7 +62,7 @@ public class Camera1 extends AbsCameraView {
     private void setupPreview() {
         try {
             if (mPreview.getOutputClass() == SurfaceHolder.class) {
-//                final boolean needsToStopPreview = mShowingPreview && Build.VERSION.SDK_INT < 14;
+                L.i("hzw", "SurfaceHolder");
                 final boolean needsToStopPreview = mShowingPreview;
                 if (needsToStopPreview) {
                     mCamera.stopPreview();
@@ -76,6 +72,7 @@ public class Camera1 extends AbsCameraView {
                     mCamera.startPreview();
                 }
             } else {
+                L.i("hzw", "SurfaceTexture");
                 mCamera.setPreviewTexture((SurfaceTexture) mPreview.getSurfaceTexture());
             }
         } catch (IOException e) {
@@ -87,19 +84,25 @@ public class Camera1 extends AbsCameraView {
      * 设置camera参数
      */
     private void adjustCameraParameters() {
+        L.i("hzw", "adjustCameraParameters");
         SortedSet<Size> sizes = mPreviewSizes.sizes(mAspectRatio);
         if (sizes == null) {
             mAspectRatio = chooseAspectRatio();
             sizes = mPreviewSizes.sizes(mAspectRatio);
         }
+        L.d("hzw", "mAspectRatio " + mAspectRatio.toString());
         Size size = chooseOptimalSize(sizes);
         Size pictureSize = mPictureSizes.sizes(mAspectRatio).last();
         if (mShowingPreview) {
             mCamera.stopPreview();
         }
+        L.iii("hzw", "PreviewSize => width = %d, height = %d", size.getWidth(), size.getHeight());
         mCameraParameters.setPreviewSize(size.getWidth(), size.getHeight());
+        L.www("hzw", "PictureSize => width = %d, height = %d", size.getWidth(), size.getHeight());
         mCameraParameters.setPictureSize(pictureSize.getWidth(), pictureSize.getHeight());
-        mCameraParameters.setRotation(calcCameraRotation(mDisplayOrientation));
+        int rotation = calcCameraRotation(mDisplayOrientation);
+        L.eee("hzw", "Rotation => mDisplayOrientation = %d, rotation = %d", mDisplayOrientation, rotation);
+        mCameraParameters.setRotation(rotation);
         setAutoFocusInternal(mAutoFocus);
         setFlashInternal(mFlash);
         mCamera.setParameters(mCameraParameters);
@@ -115,6 +118,7 @@ public class Camera1 extends AbsCameraView {
      * @return CameraParameters被修改返回true
      */
     private boolean setFlashInternal(int flash) {
+        L.iii("hzw", "flash = %d, isCameraOpened = %b", flash, isCameraOpened());
         if (isCameraOpened()) {
             List<String> modes = mCameraParameters.getSupportedFlashModes();
             String mode = FLASH_MODES.get(flash);
@@ -143,6 +147,7 @@ public class Camera1 extends AbsCameraView {
      * @return CameraParameters被修改返回true
      */
     private boolean setAutoFocusInternal(boolean autoFocus) {
+        L.iii("hzw", "autoFocus = %b, isCameraOpened = %b", autoFocus, isCameraOpened());
         mAutoFocus = autoFocus;
         if (isCameraOpened()) {
             List<String> modes = mCameraParameters.getSupportedFocusModes();
@@ -180,6 +185,21 @@ public class Camera1 extends AbsCameraView {
     }
 
     /**
+     * 计算显示方向, 用于预览
+     * 这与camera角度的计算方法不同
+     *
+     * @param screenOrientationDegrees 屏幕角度
+     * @return 旋转预览所需的度数
+     */
+    private int calcDisplayOrientation(int screenOrientationDegrees) {
+        if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            return (360 - (mCameraInfo.orientation + screenOrientationDegrees) % 360) % 360;
+        } else {
+            return (mCameraInfo.orientation - screenOrientationDegrees + 360) % 360;
+        }
+    }
+
+    /**
      * 从小到大的筛选，选着与控件大小最接近的一个
      *
      * @param sizes sizes
@@ -210,6 +230,7 @@ public class Camera1 extends AbsCameraView {
             }
             result = size;
         }
+        L.i("hzw", "result = " + result.toString());
         return result;
     }
 
@@ -230,9 +251,11 @@ public class Camera1 extends AbsCameraView {
             L.i("ratio = " + ratio.toString());
             r = ratio;
             if (ratio.equals(Constants.DEFAULT_ASPECT_RATIO)) {
+                L.i("hzw", "AspectRatio = " + r.toString());
                 return ratio;
             }
         }
+        L.i("hzw", "AspectRatio = " + r.toString());
         return r;
     }
 
@@ -245,7 +268,7 @@ public class Camera1 extends AbsCameraView {
         }
         mShowingPreview = true;
         mCamera.startPreview();
-        return false;
+        return true;
     }
 
     /**
@@ -255,6 +278,7 @@ public class Camera1 extends AbsCameraView {
         if (mCamera != null) {
             releaseCamera();
         }
+        L.i("打开摄像头");
         mCamera = Camera.open(mCameraId);
         mCameraParameters = mCamera.getParameters();
 
@@ -273,23 +297,13 @@ public class Camera1 extends AbsCameraView {
         }
 
         adjustCameraParameters();
+
+        L.iii("hzw", "mDisplayOrientation = %d, display = %d", mDisplayOrientation, calcDisplayOrientation(mDisplayOrientation));
         mCamera.setDisplayOrientation(calcDisplayOrientation(mDisplayOrientation));
         mCallback.onCameraOpened();
     }
 
-    /**
-     * 计算显示方向, 用于预览
-     * 这与camera角度的计算方法不同
-     * @param screenOrientationDegrees 屏幕角度
-     * @return 旋转预览所需的度数
-     */
-    private int calcDisplayOrientation(int screenOrientationDegrees) {
-        if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            return (360 - (mCameraInfo.orientation + screenOrientationDegrees) % 360) % 360;
-        } else {
-            return (mCameraInfo.orientation - screenOrientationDegrees + 360) % 360;
-        }
-    }
+
 
     /**
      * 释放
@@ -315,65 +329,149 @@ public class Camera1 extends AbsCameraView {
             }
         }
         mCameraId = INVALID_CAMERA_ID;
+        L.i("hzw", "mCameraId = " + mCameraId);
     }
 
     @Override
-    public boolean stop() {
-        return false;
+    public void stop() {
+        if (mCamera != null) {
+            mCamera.stopPreview();
+        }
+        mShowingPreview = false;
+        releaseCamera();
     }
 
     @Override
     public boolean isCameraOpened() {
-        return false;
+        return mCamera != null;
     }
 
     @Override
     public void setFacing(int facing) {
-
+        if (mFacing == facing) {
+            return;
+        }
+        mFacing = facing;
+        if (isCameraOpened()) {
+            stop();
+            start();
+        }
     }
 
     @Override
     public int getFacing() {
-        return 0;
+        return mFacing;
     }
 
     @Override
     public Set<AspectRatio> getSupportedAspectRatio() {
-        return null;
+        SizeMap idealAspectRatio = mPreviewSizes;
+        for (AspectRatio aspectRatio : idealAspectRatio.ratios()) {
+            if (mPictureSizes.sizes(aspectRatio) == null) {
+                idealAspectRatio.remove(aspectRatio);
+            }
+        }
+        return idealAspectRatio.ratios();
     }
 
     @Override
     public boolean setAspectRatio(AspectRatio ratio) {
+        if (mAspectRatio == null || !isCameraOpened()) {
+            mAspectRatio = ratio;
+            return true;
+        } else if (!mAspectRatio.equals(ratio)) {
+            final Set<Size> sizes = mPreviewSizes.sizes(ratio);
+            if (sizes == null) {
+                throw new UnsupportedOperationException(ratio + " 不支持");
+            } else {
+                mAspectRatio = ratio;
+                adjustCameraParameters();
+                return true;
+            }
+        }
         return false;
+    }
+
+    @Override
+    public AspectRatio getAspectRatio() {
+        return mAspectRatio;
     }
 
     @Override
     public boolean getAutoFocus() {
-        return false;
+        if (!isCameraOpened()) {
+            return mAutoFocus;
+        }
+        String focusMode = mCameraParameters.getFocusMode();
+        return focusMode != null && focusMode.contains("continuous");
     }
 
     @Override
     public void setAutoFocus(boolean autoFocus) {
-
+        if (mAutoFocus == autoFocus) {
+            return;
+        }
+        if (setAutoFocusInternal(autoFocus)) {
+            mCamera.setParameters(mCameraParameters);
+        }
     }
 
     @Override
     public void setFlash(int flash) {
-
+        if (flash == mFlash) {
+            return;
+        }
+        if (setFlashInternal(flash)) {
+            mCamera.setParameters(mCameraParameters);
+        }
     }
 
     @Override
     public int getFlash() {
-        return 0;
+        return mFlash;
     }
 
     @Override
     public void takePicture() {
+        if (!isCameraOpened()) {
+            throw new IllegalStateException("相机为启动，先启动再拍照.");
+        }
+        if (getAutoFocus()) {
+            mCamera.cancelAutoFocus();
+            mCamera.autoFocus((success, camera) -> {
+                takePictureInternal();
+            });
+        }
+    }
 
+    private void takePictureInternal() {
+        if (!isPictureCaptureInProgress.getAndSet(true)) {
+            mCamera.takePicture(null, null, (data, camera) -> {
+                isPictureCaptureInProgress.set(false);
+                mCallback.onPictureTaken(data);
+                camera.cancelAutoFocus();
+                camera.startPreview();
+            });
+        }
     }
 
     @Override
-    public void stDisplayOrientation(int displayOrientation) {
-
+    public void setDisplayOrientation(int displayOrientation) {
+        if (mDisplayOrientation == displayOrientation) {
+            return;
+        }
+        mDisplayOrientation = displayOrientation;
+        if (isCameraOpened()) {
+            mCameraParameters.setRotation(calcCameraRotation(displayOrientation));
+            mCamera.setParameters(mCameraParameters);
+            final boolean needToStopPreview = mShowingPreview;
+            if (needToStopPreview) {
+                mCamera.stopPreview();
+            }
+            mCamera.setDisplayOrientation(calcDisplayOrientation(displayOrientation));
+            if (needToStopPreview) {
+                mCamera.startPreview();
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
     private final int mX;
     private final int mY;
 
-    public AspectRatio(int x, int y) {
+    private AspectRatio(int x, int y) {
         mX = x;
         mY = y;
     }
@@ -160,8 +160,12 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
         return mX + " : " + mY + " => mX / mY = " + toFloat();
     }
 
-    private float toFloat() {
+    public float toFloat() {
         return (float) mX / mY;
+    }
+
+    public AspectRatio inverse() {
+        return AspectRatio.of(mY, mX);
     }
 
     public int getX() {

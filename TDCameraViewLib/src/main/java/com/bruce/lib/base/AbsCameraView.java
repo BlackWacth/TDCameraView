@@ -24,7 +24,7 @@ public abstract class AbsCameraView {
      */
     public abstract boolean start();
 
-    public abstract boolean stop();
+    public abstract void stop();
 
     public abstract boolean isCameraOpened();
 
@@ -42,6 +42,8 @@ public abstract class AbsCameraView {
      */
     public abstract boolean setAspectRatio(AspectRatio ratio);
 
+    public abstract AspectRatio getAspectRatio();
+
     public abstract boolean getAutoFocus();
 
     public abstract void setAutoFocus(boolean autoFocus);
@@ -52,7 +54,7 @@ public abstract class AbsCameraView {
 
     public abstract void takePicture();
 
-    public abstract void stDisplayOrientation(int displayOrientation);
+    public abstract void setDisplayOrientation(int displayOrientation);
 
     public interface Callback {
         void onCameraOpened();
