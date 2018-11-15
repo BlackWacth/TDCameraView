@@ -37,7 +37,7 @@ public abstract class DisplayOrientationDetector {
                     return;
                 }
                 final int rotation = mDisplay.getRotation();
-                L.www("hzw", "rotation = %d, orientation = %d", rotation, orientation);
+//                L.www("hzw", "rotation = %d, orientation = %d", rotation, orientation);
                 if (mLastKnownRotation != rotation) {
                     mLastKnownRotation = rotation;
                     dispatchOnDisplayOrientationChanged(DISPLAY_ORIENTATIONS.get(rotation));

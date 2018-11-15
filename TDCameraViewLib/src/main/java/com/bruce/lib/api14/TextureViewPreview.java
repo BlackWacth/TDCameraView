@@ -86,6 +86,12 @@ public class TextureViewPreview extends AbsPreview {
         return mTextureView.getSurfaceTexture() != null;
     }
 
+    @Override
+    public void setBufferSize(int width, int height) {
+        //这句话不设置会导致，竖直拿着图像被横向挤压，横向拿着图像横向拉伸
+        mTextureView.getSurfaceTexture().setDefaultBufferSize(width, height);
+    }
+
     /**
      * 基于mDisplayOrientation和surface大小配置TextureView的变换矩阵
      */

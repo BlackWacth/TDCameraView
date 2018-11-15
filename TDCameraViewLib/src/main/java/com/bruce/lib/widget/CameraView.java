@@ -171,8 +171,8 @@ public class CameraView extends FrameLayout {
             if (widthMode == MeasureSpec.EXACTLY && heightMode != MeasureSpec.EXACTLY) {
                 final AspectRatio ratio = getAspectRatio();
                 //todo width固定，求高，比例 width * y / x
-//                int height = (int) (MeasureSpec.getSize(widthMeasureSpec) * ratio.toFloat());
-                int height = MeasureSpec.getSize(widthMeasureSpec) * ratio.getY() / ratio.getX();
+                int height = (int) (MeasureSpec.getSize(widthMeasureSpec) * ratio.toFloat());
+//                int height = MeasureSpec.getSize(widthMeasureSpec) * ratio.getY() / ratio.getX();
                 if (heightMode == MeasureSpec.AT_MOST) {
                     height = Math.min(height, MeasureSpec.getSize(heightMeasureSpec));
                 }
@@ -291,6 +291,7 @@ public class CameraView extends FrameLayout {
     }
 
     public void setFacing(@Facing int facing) {
+        L.w("facing = " + facing);
         mAbsCameraView.setFacing(facing);
     }
 

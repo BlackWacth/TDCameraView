@@ -123,7 +123,9 @@ public class Camera2 extends AbsCameraView {
             try {
                 mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, null);
             } catch (CameraAccessException e) {
-                L.e("hzw", "无法启动相机预览，因为它无法访问相机", e);
+                Log.e("hzw", "无法启动相机预览，因为它无法访问相机", e);
+            } catch (IllegalStateException e) {
+                Log.e("hzw", "无法启动相机预览", e);
             }
         }
 
@@ -166,6 +168,7 @@ public class Camera2 extends AbsCameraView {
         if (!chooseCameraIdByFacing()) {
             return false;
         }
+        L.i("mCameraId = " + mCameraId);
         collectCameraInfo();
         prepareImageReader();
         startOpeningCamera();
@@ -186,6 +189,7 @@ public class Camera2 extends AbsCameraView {
             mImageReader.close();
         }
         Size largest = mPictureSizes.sizes(mAspectRatio).last();
+        L.i("largest = " + largest.toString());
         mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(), ImageFormat.JPEG, 2);
         mImageReader.setOnImageAvailableListener(mOnImageAvailableListener, null);
     }
@@ -199,7 +203,6 @@ public class Camera2 extends AbsCameraView {
         for (android.util.Size size : map.getOutputSizes(mPreview.getOutputClass())) {
             int width = size.getWidth();
             int height = size.getHeight();
-            L.ii("width = %d, height = %d", width, height);
             if (width <= MAX_PREVIEW_WIDTH && height <= MAX_PREVIEW_HEIGHT) {
                 mPreviewSizes.add(new Size(width, height));
             }
@@ -217,13 +220,28 @@ public class Camera2 extends AbsCameraView {
         if (!mPreviewSizes.ratios().contains(mAspectRatio)) {
             mAspectRatio = mPreviewSizes.ratios().iterator().next();
         }
+
+//        L.i("mAspectRatio = " + mAspectRatio.toString());
+//
+        for (AspectRatio ratio : mPreviewSizes.ratios()) {
+            for (Size size : mPreviewSizes.sizes(ratio)) {
+                L.e("mPreviewSizes ==> " + ratio.toString() + " >>> " + size.toString());
+            }
+        }
+//
+//        L.i("==========================================================================");
+//
+//        for (AspectRatio ratio : mPictureSizes.ratios()) {
+//            for (Size size : mPictureSizes.sizes(ratio)) {
+//                L.e("mPictureSizes ==> " + ratio.toString() + " >>> " + size.toString());
+//            }
+//        }
     }
 
     private void collectPictureSizes(SizeMap sizeMap, StreamConfigurationMap map) {
         for (android.util.Size size : map.getOutputSizes(ImageFormat.JPEG)) {
             int width = size.getWidth();
             int height = size.getHeight();
-            L.ii("width = %d, height = %d", width, height);
             mPictureSizes.add(new Size(width, height));
         }
     }
@@ -305,6 +323,7 @@ public class Camera2 extends AbsCameraView {
         if (mFacing == facing) {
             return;
         }
+        L.w("facing = " + facing);
         mFacing = facing;
         if (isCameraOpened()) {
             stop();
@@ -371,7 +390,7 @@ public class Camera2 extends AbsCameraView {
             return;
         }
         int saved = mFlash;
-        mFacing = flash;
+        mFlash = flash;
         if (mPreviewRequestBuilder != null) {
             updateFlash();
             if (mCaptureSession != null) {
@@ -450,13 +469,18 @@ public class Camera2 extends AbsCameraView {
 
         SortedSet<Size> candidates = mPreviewSizes.sizes(mAspectRatio);
 
+        L.ww("surfaceLonger = %d, surfaceShorter = %d", surfaceLonger, surfaceShorter);
+
         //挑选那些足够大的那些
         for (Size size : candidates) {
+            L.e(size.toString());
             if (size.getWidth() >= surfaceLonger && size.getHeight() >= surfaceShorter) {
+                L.e("最终 == " + size.toString());
                 return size;
             }
         }
         // 如果没有足够大的尺寸，请选择最大尺寸。
+        L.e("最终 》》 " + candidates.last().toString());
         return candidates.last();
     }
 
@@ -478,34 +502,24 @@ public class Camera2 extends AbsCameraView {
     private void updateAutoFocus() {
         switch (mFlash) {
             case Constants.FLASH_OFF:
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                        CaptureRequest.CONTROL_AE_MODE_ON);
-                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,
-                        CaptureRequest.FLASH_MODE_OFF);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
                 break;
             case Constants.FLASH_ON:
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                        CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
-                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,
-                        CaptureRequest.FLASH_MODE_OFF);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH);
+                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
                 break;
             case Constants.FLASH_TORCH:
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                        CaptureRequest.CONTROL_AE_MODE_ON);
-                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,
-                        CaptureRequest.FLASH_MODE_TORCH);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
                 break;
             case Constants.FLASH_AUTO:
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,
-                        CaptureRequest.FLASH_MODE_OFF);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
                 break;
             case Constants.FLASH_RED_EYE:
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
-                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE,
-                        CaptureRequest.FLASH_MODE_OFF);
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE);
+                mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
                 break;
         }
     }
@@ -596,13 +610,13 @@ public class Camera2 extends AbsCameraView {
 
         @Override
         public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureResult partialResult) {
-            L.i("hzw", "onCaptureProgressed");
+//            L.i("hzw", "onCaptureProgressed");
             process(partialResult);
         }
 
         @Override
         public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-            L.i("hzw", "onCaptureCompleted");
+//            L.i("hzw", "onCaptureCompleted");
             process(result);
         }
 

@@ -1,15 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context=".MainActivity">
 
     <com.bruce.lib.widget.CameraView
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"/>
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        app:facing="back"/>
 
-</FrameLayout>
+    <RadioGroup
+        android:id="@+id/rg_ratio_radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_above="@+id/fab_take_picture"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_take_picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        app:srcCompat="@drawable/ic_camera"
+        app:useCompatPadding="true"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_camera_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="32dp"
+        app:srcCompat="@drawable/ic_switch_camera"
+        app:useCompatPadding="true"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_camera_flash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="32dp"
+        app:srcCompat="@drawable/ic_flash_auto"
+        app:useCompatPadding="true"/>
+
+
+</RelativeLayout>

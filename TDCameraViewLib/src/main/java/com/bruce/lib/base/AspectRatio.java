@@ -157,7 +157,7 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
 
     @Override
     public String toString() {
-        return mX + " : " + mY + " => mX / mY = " + toFloat();
+        return mX + " : " + mY;
     }
 
     public float toFloat() {
